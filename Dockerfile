@@ -41,12 +41,6 @@ USER 472
 # Default ports: 3000 (Grafana Web UI), 9090 (Prometheus API / UI)
 EXPOSE 3000 9090
 
-# Environment defaults
-ENV PROMETHEUS_URL=http://localhost:9090
-ENV GF_SECURITY_ADMIN_USER=admin
-ENV GF_SECURITY_ADMIN_PASSWORD=admin
-ENV GF_USERS_ALLOW_SIGN_UP=false
-
 # Health check targeting Grafana's /api/health endpoint
 HEALTHCHECK --interval=15s --timeout=5s --start-period=15s --retries=3 \
   CMD curl -f http://localhost:${PORT:-3000}/api/health || exit 1
