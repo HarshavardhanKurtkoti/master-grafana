@@ -146,18 +146,34 @@ docker compose down
 
 Render Cloud is supported in two ways:
 
-### Method A: Render Blueprints (`render.yaml`) — Recommended
+### Method A: Render Blueprints (`render.yaml`) — Recommended (Zero Setup)
 This provisions both Prometheus and Grafana automatically as an Infrastructure-as-Code stack.
 
 1. Push this repository to GitHub / GitLab.
 2. In the [Render Dashboard](https://dashboard.render.com/):
-   - Click **New +** &rarr; **Blueprint**.
-   - Select your Git repository.
-   - Render reads `render.yaml` and provisions both services.
+   - Click **New +** &rarr; **Blueprint** (⚠️ *choose Blueprint, not Web Service*).
+   - Connect your Git repository.
+   - Render automatically reads [render.yaml](file:///c:/Local-Disk-D/Projects/master-grafana/render.yaml), isolates each container using `rootDir: grafana` and `rootDir: prometheus`, and provisions both services.
 3. Render automatically sets up:
    - Zero-downtime deploys using `healthCheckPath: /api/health` and `healthCheckPath: /-/healthy`.
    - Continuous deployment on every git push to `main`.
    - Internal service networking connecting Grafana to Prometheus.
+
+### Method B: Manual Web Services (via Render UI)
+If you prefer creating individual Web Services manually instead of using Blueprints:
+
+1. **For Grafana Service:**
+   - Click **New +** &rarr; **Web Service**.
+   - Runtime: **Docker**
+   - **Root Directory**: `grafana` *(Required so Render finds `grafana/Dockerfile`)*
+   - **Health Check Path**: `/api/health`
+   - Port: `3000`
+2. **For Prometheus Service:**
+   - Click **New +** &rarr; **Web Service**.
+   - Runtime: **Docker**
+   - **Root Directory**: `prometheus` *(Required so Render finds `prometheus/Dockerfile`)*
+   - **Health Check Path**: `/-/healthy`
+   - Port: `9090`
 
 ### Method B: Render Deploy Hooks + GitHub Actions
 If you prefer CI/CD orchestration through GitHub Actions:
