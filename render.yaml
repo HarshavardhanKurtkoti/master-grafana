@@ -1,0 +1,53 @@
+# Render Blueprint Configuration (Infrastructure as Code)
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  # -----------------------------------------------------------
+  # 1. Prometheus Monitoring Engine
+  # -----------------------------------------------------------
+  - type: web
+    name: master-prometheus
+    runtime: docker
+    dockerfilePath: ./prometheus/Dockerfile
+    dockerContext: ./prometheus
+    plan: free # Change to starter/standard for production disk persistence
+    healthCheckPath: /-/healthy
+    envVars:
+      - key: PORT
+        value: 9090
+    # Uncomment the disk block below if running on a paid Render plan (Starter+)
+    # disk:
+    #   name: prometheus-data
+    #   mountPath: /prometheus
+    #   sizeGB: 10
+
+  # -----------------------------------------------------------
+  # 2. Grafana Dashboard Service
+  # -----------------------------------------------------------
+  - type: web
+    name: master-grafana
+    runtime: docker
+    dockerfilePath: ./grafana/Dockerfile
+    dockerContext: ./grafana
+    plan: free # Change to starter/standard for production disk persistence
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: GF_SERVER_HTTP_PORT
+        value: 3000
+      - key: GF_SECURITY_ADMIN_USER
+        value: admin
+      - key: GF_SECURITY_ADMIN_PASSWORD
+        generateValue: true # Render will automatically generate a secure password
+      - key: GF_USERS_ALLOW_SIGN_UP
+        value: "false"
+      - key: PROMETHEUS_URL
+        fromService:
+          type: web
+          name: master-prometheus
+          property: host
+    # Uncomment the disk block below if running on a paid Render plan (Starter+)
+    # disk:
+    #   name: grafana-data
+    #   mountPath: /var/lib/grafana
+    #   sizeGB: 10

@@ -1,0 +1,165 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # -------------------------------------------------------------
+  # Stage 1: Validation and Linting
+  # -------------------------------------------------------------
+  lint-and-validate:
+    name: Lint & Validate Configurations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Validate Prometheus Configuration with Promtool
+        run: |
+          echo "Validating prometheus.yml syntax..."
+          docker run --rm -v ${{ github.workspace }}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml \
+            prom/prometheus:v3.2.1 \
+            check config /etc/prometheus/prometheus.yml
+
+      - name: Validate Dashboard JSON Syntax
+        run: |
+          echo "Validating Grafana dashboard JSON..."
+          sudo apt-get update && sudo apt-get install -y jq
+          jq empty grafana/provisioning/dashboards/json/prometheus-overview.json
+          echo "Dashboard JSON is valid!"
+
+      - name: Validate Docker Compose Config
+        run: |
+          echo "Validating docker-compose.yml configuration..."
+          docker compose config --quiet
+          echo "Docker compose syntax is valid!"
+
+  # -------------------------------------------------------------
+  # Stage 2: Container Build & Integration Smoke Tests
+  # -------------------------------------------------------------
+  build-and-test:
+    name: Build & Smoke Test Containers
+    runs-on: ubuntu-latest
+    needs: [ lint-and-validate ]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Images
+        run: |
+          echo "Building Prometheus and Grafana Docker images..."
+          docker compose build --pull
+
+      - name: Start Services
+        run: |
+          echo "Starting containers in detached mode..."
+          docker compose up -d
+
+      - name: Wait for Services & Health Check Probe
+        run: |
+          echo "Waiting for services to become healthy..."
+          timeout=60
+          counter=0
+
+          # 1. Wait for Prometheus /-/healthy
+          echo "Waiting for Prometheus..."
+          until curl -s -f http://localhost:9090/-/healthy > /dev/null; do
+            sleep 2
+            counter=$((counter+2))
+            if [ $counter -ge $timeout ]; then
+              echo "Prometheus failed to report healthy within $timeout seconds!"
+              docker compose logs prometheus
+              exit 1
+            fi
+          done
+          echo "Prometheus is healthy! (Response: $(curl -s http://localhost:9090/-/healthy))"
+
+          # 2. Wait for Grafana /api/health
+          echo "Waiting for Grafana..."
+          counter=0
+          until curl -s -f http://localhost:3000/api/health > /dev/null; do
+            sleep 2
+            counter=$((counter+2))
+            if [ $counter -ge $timeout ]; then
+              echo "Grafana failed to report healthy within $timeout seconds!"
+              docker compose logs grafana
+              exit 1
+            fi
+          done
+          echo "Grafana is healthy! (Response: $(curl -s http://localhost:3000/api/health))"
+
+      - name: Verify Grafana Prometheus Datasource
+        run: |
+          echo "Verifying Grafana data source..."
+          DATASOURCES=$(curl -s -u admin:admin http://localhost:3000/api/datasources)
+          echo "$DATASOURCES"
+          if echo "$DATASOURCES" | grep -q "Prometheus"; then
+            echo "Prometheus datasource successfully auto-provisioned in Grafana!"
+          else
+            echo "Datasource verification failed!"
+            exit 1
+          fi
+
+      - name: Teardown Services
+        if: always()
+        run: |
+          docker compose down -v
+
+  # -------------------------------------------------------------
+  # Stage 3: Continuous Deployment to Render Cloud
+  # -------------------------------------------------------------
+  deploy-to-render:
+    name: Continuous Deployment (Render Cloud)
+    runs-on: ubuntu-latest
+    needs: [ build-and-test ]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    steps:
+      - name: Trigger Render Deploy Hook (Grafana)
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_GRAFANA || secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -n "$RENDER_DEPLOY_HOOK" ]; then
+            echo "Triggering Render deployment for Grafana..."
+            RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "$RENDER_DEPLOY_HOOK")
+            HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS" | cut -d: -f2)
+            echo "Deploy hook response: $RESPONSE"
+            if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+              echo "Render Grafana deployment successfully triggered!"
+            else
+              echo "Failed to trigger Render deployment. HTTP Status: $HTTP_STATUS"
+              exit 1
+            fi
+          else
+            echo "No RENDER_DEPLOY_HOOK secret provided."
+            echo "Note: If using Render Blueprints (render.yaml), Render auto-deploys upon push to main."
+          fi
+
+      - name: Trigger Render Deploy Hook (Prometheus)
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_PROMETHEUS }}
+        run: |
+          if [ -n "$RENDER_DEPLOY_HOOK" ]; then
+            echo "Triggering Render deployment for Prometheus..."
+            RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "$RENDER_DEPLOY_HOOK")
+            HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS" | cut -d: -f2)
+            echo "Deploy hook response: $RESPONSE"
+            if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+              echo "Render Prometheus deployment successfully triggered!"
+            else
+              echo "Failed to trigger Render deployment. HTTP Status: $HTTP_STATUS"
+              exit 1
+            fi
+          else
+            echo "No RENDER_DEPLOY_HOOK_PROMETHEUS secret set. If managed by Blueprint, auto-deploy is handled by Render."
+          fi
