@@ -58,8 +58,10 @@ jobs:
 
       - name: Build Docker Images
         run: |
-          echo "Building Prometheus and Grafana Docker images..."
+          echo "Building Prometheus and Grafana Docker images via Compose..."
           docker compose build --pull
+          echo "Building Unified Render Dockerfile..."
+          docker build -t master-unified:test .
 
       - name: Start Services
         run: |
