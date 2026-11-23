@@ -11,8 +11,11 @@ if [ -n "$PORT" ]; then
   echo "[+] Detected Render PORT=$PORT, configuring Grafana to listen on $PORT"
 fi
 
-# Ensure Prometheus URL points to internal localhost if not explicitly overridden
-export PROMETHEUS_URL="${PROMETHEUS_URL:-http://localhost:9090}"
+# Ensure Prometheus URL points to internal IPv4 127.0.0.1 if not explicitly overridden
+export PROMETHEUS_URL="${PROMETHEUS_URL:-http://127.0.0.1:9090}"
+if [ "$PROMETHEUS_URL" = "http://localhost:9090" ]; then
+  export PROMETHEUS_URL="http://127.0.0.1:9090"
+fi
 echo "[+] Grafana Prometheus DataSource URL: $PROMETHEUS_URL"
 
 # 1. Start Prometheus daemon in background
@@ -24,8 +27,12 @@ echo "[+] Starting Prometheus on port 9090..."
   --web.enable-lifecycle &
 PROM_PID=$!
 
-# 2. Wait a moment for Prometheus to bind port
-sleep 1
+# 2. Wait for Prometheus to be fully ready before starting Grafana
+echo "[+] Waiting for Prometheus TSDB engine to initialize..."
+until curl -s http://127.0.0.1:9090/-/ready > /dev/null 2>&1; do
+  sleep 0.5
+done
+echo "[+] Prometheus is healthy and accepting queries!"
 
 # 3. Start Grafana in background
 echo "[+] Starting Grafana on port ${GF_SERVER_HTTP_PORT:-3000}..."
