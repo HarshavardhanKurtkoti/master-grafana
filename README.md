@@ -39,7 +39,10 @@ flowchart LR
 
 - **Dual-Container Setup**: Separate, modular Dockerfiles for Grafana and Prometheus.
 - **Auto-Provisioned Datasource**: Grafana automatically discovers and connects to Prometheus on startup (`PROMETHEUS_URL`).
-- **Pre-loaded Dashboard**: Built-in system overview dashboard (`prometheus-overview.json`) ready on initial login.
+- **Pre-loaded Dashboards**:
+  - `prometheus-overview.json`: Core infrastructure and Prometheus system health.
+  - `portfolio-analytics.json`: Full Real User Monitoring (RUM), visitor demographics, section dwell times, 3D model interactions, conversion funnel, and Core Web Vitals for [harshakurtkoti.in](https://harshakurtkoti.in).
+- **Direct Origin Telemetry (Bypasses Cloudflare Proxy Requirement)**: Scrapes telemetry directly from the portfolio's `/api/metrics` endpoint without needing Cloudflare's Orange Proxy (DNS-only / grey-cloud compatible).
 - **Native Health Endpoints**:
   - Grafana: `GET /api/health` &rarr; returns `{"commit":"...","database":"ok","version":"..."}`
   - Prometheus: `GET /-/healthy` & `GET /-/ready`

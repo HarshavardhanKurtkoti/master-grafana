@@ -31,3 +31,16 @@ scrape_configs:
         labels:
           service: "grafana"
           environment: "production"
+
+  # Scrape Harshavardhan Kurtkoti Portfolio Website (harshakurtkoti.in)
+  - job_name: "portfolio_website"
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: "/api/metrics"
+    scheme: "https"
+    static_configs:
+      - targets: ["harshakurtkoti.in"]
+        labels:
+          service: "portfolio-website"
+          domain: "harshakurtkoti.in"
+          environment: "production"

@@ -33,8 +33,11 @@ jobs:
         run: |
           echo "Validating Grafana dashboard JSON..."
           sudo apt-get update && sudo apt-get install -y jq
-          jq empty grafana/provisioning/dashboards/json/prometheus-overview.json
-          echo "Dashboard JSON is valid!"
+          for file in grafana/provisioning/dashboards/json/*.json; do
+            echo "Checking $file..."
+            jq empty "$file"
+          done
+          echo "All dashboard JSON files are valid!"
 
       - name: Validate Docker Compose Config
         run: |
