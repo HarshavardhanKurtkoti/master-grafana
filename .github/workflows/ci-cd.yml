@@ -25,7 +25,7 @@ jobs:
       - name: Validate Prometheus Configuration with Promtool
         run: |
           echo "Validating prometheus.yml syntax..."
-          docker run --rm -v ${{ github.workspace }}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml \
+          docker run --rm --entrypoint /bin/promtool -v ${{ github.workspace }}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml \
             prom/prometheus:v3.2.1 \
             check config /etc/prometheus/prometheus.yml
 
@@ -106,15 +106,8 @@ jobs:
 
       - name: Verify Grafana Prometheus Datasource
         run: |
-          echo "Verifying Grafana data source..."
-          DATASOURCES=$(curl -s -u admin:admin http://localhost:3000/api/datasources)
-          echo "$DATASOURCES"
-          if echo "$DATASOURCES" | grep -q "Prometheus"; then
-            echo "Prometheus datasource successfully auto-provisioned in Grafana!"
-          else
-            echo "Datasource verification failed!"
-            exit 1
-          fi
+          curl --fail --silent --show-error -u admin:admin \
+            http://localhost:3000/api/datasources/uid/Prometheus/health | jq -e '.status == "OK"'
 
       - name: Teardown Services
         if: always()

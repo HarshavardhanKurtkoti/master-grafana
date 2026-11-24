@@ -27,7 +27,7 @@ scrape_configs:
   - job_name: "grafana"
     metrics_path: "/metrics"
     static_configs:
-      - targets: ["127.0.0.1:3000"]
+      - targets: ["grafana:3000"]
         labels:
           service: "grafana"
           environment: "production"
@@ -36,10 +36,10 @@ scrape_configs:
   - job_name: "portfolio_website"
     scrape_interval: 15s
     scrape_timeout: 10s
-    metrics_path: "/api/metrics"
+    metrics_path: "/portfolio-telemetry/metrics"
     scheme: "https"
     static_configs:
-      - targets: ["www.harshakurtkoti.in"]
+      - targets: ["grafana.harshakurtkoti.in"]
         labels:
           service: "portfolio-website"
           domain: "harshakurtkoti.in"

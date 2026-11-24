@@ -42,7 +42,9 @@ flowchart LR
 - **Pre-loaded Dashboards**:
   - `prometheus-overview.json`: Core infrastructure and Prometheus system health.
   - `portfolio-analytics.json`: Full Real User Monitoring (RUM), visitor demographics, section dwell times, 3D model interactions, conversion funnel, and Core Web Vitals for [harshakurtkoti.in](https://harshakurtkoti.in).
-- **Direct Origin Telemetry (Bypasses Cloudflare Proxy Requirement)**: Scrapes telemetry directly from the portfolio's `/api/metrics` endpoint without needing Cloudflare's Orange Proxy (DNS-only / grey-cloud compatible).
+- **Portfolio event ingestion**: The portfolio API pushes validated events to `POST /portfolio-telemetry/events` on the Grafana host. Prometheus scrapes the collector every 15 seconds. The unified deployment scrapes loopback. Standalone Prometheus scrapes the production collector over HTTPS.
+- **Collector state**: A single collector writes counters, recent delivery IDs, bounded vital samples and recent sessions to `/var/lib/grafana/portfolio-events.json` before acknowledging a delivery. Compose persists this directory in its Grafana volume. On Render, attach a disk at that path's parent directory to retain counters across redeploys. Without a disk the lifetime total can reset.
+- **Relay authentication**: Configure `PORTFOLIO_COLLECTOR_TOKEN` only on the portfolio server. The collector compares its SHA-256 digest to `grafana/collector/relay-key.sha256`. To rotate, provision a new random 32-byte token encoded as 64 hex digits and deploy the corresponding digest. A test collector can override the digest with `COLLECTOR_TOKEN_SHA256`.
 - **Native Health Endpoints**:
   - Grafana: `GET /api/health` &rarr; returns `{"commit":"...","database":"ok","version":"..."}`
   - Prometheus: `GET /-/healthy` & `GET /-/ready`
@@ -160,7 +162,7 @@ This provisions both Prometheus and Grafana automatically as an Infrastructure-a
 3. Render automatically sets up:
    - Zero-downtime deploys using `healthCheckPath: /api/health` and `healthCheckPath: /-/healthy`.
    - Continuous deployment on every git push to `main`.
-   - Internal service networking connecting Grafana to Prometheus.
+   - Grafana connects to the free Prometheus web service through its Render HTTPS URL.
 
 ### Method B: Manual Web Services (via Render UI)
 If you prefer creating individual Web Services manually instead of using Blueprints:

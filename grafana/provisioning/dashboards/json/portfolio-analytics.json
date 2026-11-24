@@ -48,7 +48,7 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [],
-          "noValue": "0",
+          "noValue": "No data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -63,7 +63,7 @@
       "id": 1,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
@@ -73,12 +73,14 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "portfolio_active_visitors or vector(0)",
+          "expr": "portfolio_active_visitors{job=\"portfolio_website\"}",
           "legendFormat": "Active Visitors",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
+      "description": "Distinct tab sessions with a page load or heartbeat in the preceding three minutes. Visible tabs send a heartbeat once per minute.",
       "title": "Active Visitors (Last 3m)",
       "type": "stat"
     },
@@ -88,7 +90,7 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [],
-          "noValue": "0",
+          "noValue": "No data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -102,7 +104,7 @@
       "id": 2,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
@@ -112,12 +114,14 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum(portfolio_pageviews_total) or vector(0)",
+          "expr": "sum(portfolio_pageviews_total{job=\"portfolio_website\"})",
           "legendFormat": "Total Pageviews",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
+      "description": "Cumulative page loads recorded by the exporter as of the end of the selected time range. Each full page load counts once.",
       "title": "Total Pageviews",
       "type": "stat"
     },
@@ -127,7 +131,7 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [],
-          "noValue": "0",
+          "noValue": "No data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -141,7 +145,7 @@
       "id": 3,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
@@ -151,9 +155,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum(portfolio_clicks_total{target=\"resume\"}) or vector(0)",
+          "expr": "sum(portfolio_clicks_total{job=\"portfolio_website\",target=\"resume\"})",
           "legendFormat": "Resume Clicks",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -166,7 +171,7 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [],
-          "noValue": "0",
+          "noValue": "No data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -180,7 +185,7 @@
       "id": 4,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
@@ -190,9 +195,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum(portfolio_form_events_total{action=\"success\"}) or vector(0)",
+          "expr": "sum(portfolio_form_events_total{job=\"portfolio_website\",action=\"success\"})",
           "legendFormat": "Messages Delivered",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -205,7 +211,7 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [],
-          "noValue": "1.25",
+          "noValue": "No data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -221,7 +227,7 @@
       "id": 5,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
@@ -231,9 +237,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "portfolio_web_vitals_lcp_seconds or vector(1.25)",
+          "expr": "portfolio_web_vitals_lcp_seconds{job=\"portfolio_website\"} >= 0",
           "legendFormat": "LCP Load Time",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -246,7 +253,7 @@
         "defaults": {
           "color": { "mode": "thresholds" },
           "mappings": [],
-          "noValue": "0",
+          "noValue": "No data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -270,9 +277,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "portfolio_uptime_seconds or vector(0)",
+          "expr": "portfolio_uptime_seconds{job=\"portfolio_website\"}",
           "legendFormat": "Uptime",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -297,7 +305,7 @@
             "fillOpacity": 15,
             "gradientMode": "opacity"
           },
-          "noValue": "0",
+          "noValue": "No data",
           "unit": "reqps"
         }
       },
@@ -311,7 +319,7 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum(rate(portfolio_pageviews_total[2m])) or vector(0)",
+          "expr": "sum(rate(portfolio_page_loads_total{job=\"portfolio_website\"}[$__rate_interval])) or sum(rate(portfolio_pageviews_total{job=\"portfolio_website\"}[$__rate_interval]))",
           "legendFormat": "Pageviews per Second",
           "range": true,
           "refId": "A"
@@ -327,13 +335,13 @@
           "color": { "mode": "palette-classic" },
           "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
           "mappings": [],
-          "noValue": "No traffic yet"
+          "noValue": "No data"
         }
       },
       "gridPos": { "h": 8, "w": 6, "x": 12, "y": 6 },
       "id": 8,
       "options": {
-        "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] },
+        "legend": { "displayMode": "table", "placement": "bottom", "values": ["value", "percent"] },
         "pieType": "donut",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
       },
@@ -341,9 +349,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum by (device) (portfolio_pageviews_total) or vector(0)",
+          "expr": "sum by (device) (portfolio_pageviews_total{job=\"portfolio_website\"}) > 0",
           "legendFormat": "{{device}}",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -357,13 +366,13 @@
           "color": { "mode": "palette-classic" },
           "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
           "mappings": [],
-          "noValue": "No traffic yet"
+          "noValue": "No data"
         }
       },
       "gridPos": { "h": 8, "w": 6, "x": 18, "y": 6 },
       "id": 9,
       "options": {
-        "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] },
+        "legend": { "displayMode": "table", "placement": "bottom", "values": ["value", "percent"] },
         "pieType": "donut",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
       },
@@ -371,9 +380,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum by (browser) (portfolio_pageviews_total) or vector(0)",
+          "expr": "sum by (browser) (portfolio_pageviews_total{job=\"portfolio_website\"}) > 0",
           "legendFormat": "{{browser}}",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -392,17 +402,14 @@
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
-          "custom": { "fillOpacity": 80 },
-          "noValue": "0",
+          "noValue": "No data",
           "unit": "short"
         }
       },
       "gridPos": { "h": 8, "w": 8, "x": 0, "y": 15 },
       "id": 10,
       "options": {
-        "barRadius": 0.25,
-        "groupWidth": 0.7,
-        "legend": { "displayMode": "hidden" },
+        "displayMode": "basic",
         "orientation": "horizontal",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
       },
@@ -410,21 +417,22 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum by (section) (portfolio_section_views_total) or vector(0)",
+          "expr": "sum by (section) (portfolio_section_views_total{job=\"portfolio_website\"})",
           "legendFormat": "{{section}}",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
       "title": "Section Popularity (Views by Section)",
-      "type": "barchart"
+      "type": "bargauge"
     },
     {
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
-          "noValue": "0",
+          "noValue": "No data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -447,9 +455,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum by (section) (portfolio_section_dwell_seconds_total) or vector(0)",
+          "expr": "sum by (section) (portfolio_section_dwell_seconds_total{job=\"portfolio_website\"})",
           "legendFormat": "{{section}}",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -461,16 +470,14 @@
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
-          "noValue": "0",
+          "noValue": "No data",
           "unit": "short"
         }
       },
       "gridPos": { "h": 8, "w": 8, "x": 16, "y": 15 },
       "id": 12,
       "options": {
-        "barRadius": 0.2,
-        "groupWidth": 0.7,
-        "legend": { "displayMode": "hidden" },
+        "displayMode": "basic",
         "orientation": "vertical",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
       },
@@ -478,14 +485,15 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum by (depth) (portfolio_scroll_depth_milestones_total) or vector(0)",
+          "expr": "sum by (depth) (portfolio_scroll_depth_milestones_total{job=\"portfolio_website\"})",
           "legendFormat": "Scrolled {{depth}}",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
       "title": "Vertical Scroll Depth Milestones",
-      "type": "barchart"
+      "type": "bargauge"
     },
     {
       "collapsed": false,
@@ -499,7 +507,7 @@
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
-          "noValue": "0",
+          "noValue": "No data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -522,9 +530,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum by (pose) (portfolio_3d_pose_triggers_total) or vector(0)",
+          "expr": "sum by (pose) (portfolio_3d_pose_triggers_total{job=\"portfolio_website\"})",
           "legendFormat": "Pose: {{pose}}",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -536,14 +545,14 @@
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
-          "noValue": "0",
+          "noValue": "No data",
           "unit": "short"
         }
       },
       "gridPos": { "h": 7, "w": 12, "x": 12, "y": 24 },
       "id": 14,
       "options": {
-        "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] },
+        "legend": { "displayMode": "table", "placement": "bottom", "values": ["value", "percent"] },
         "pieType": "donut",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
       },
@@ -551,9 +560,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum by (mode) (portfolio_3d_material_toggles_total) or vector(0)",
+          "expr": "sum by (mode) (portfolio_3d_material_toggles_total{job=\"portfolio_website\"})",
           "legendFormat": "Finish: {{mode}}",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -572,16 +582,14 @@
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
-          "noValue": "0",
+          "noValue": "No data",
           "unit": "short"
         }
       },
       "gridPos": { "h": 7, "w": 12, "x": 0, "y": 32 },
       "id": 15,
       "options": {
-        "barRadius": 0.25,
-        "groupWidth": 0.65,
-        "legend": { "displayMode": "hidden" },
+        "displayMode": "basic",
         "orientation": "horizontal",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
       },
@@ -589,21 +597,22 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum by (target) (portfolio_clicks_total) or vector(0)",
+          "expr": "sum by (target) (portfolio_clicks_total{job=\"portfolio_website\"})",
           "legendFormat": "{{target}}",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
       "title": "CTA & Outbound Conversion Clicks",
-      "type": "barchart"
+      "type": "bargauge"
     },
     {
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
-          "noValue": "0",
+          "noValue": "No data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -625,9 +634,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "portfolio_form_events_total or vector(0)",
+          "expr": "sum by (action) (portfolio_form_events_total{job=\"portfolio_website\"})",
           "legendFormat": "Action: {{action}}",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -648,7 +658,7 @@
           "color": { "mode": "thresholds" },
           "max": 5,
           "min": 0,
-          "noValue": "1.25",
+          "noValue": "No data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -672,9 +682,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "portfolio_web_vitals_lcp_seconds or vector(1.25)",
+          "expr": "portfolio_web_vitals_lcp_seconds{job=\"portfolio_website\"} >= 0",
           "legendFormat": "LCP",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -688,7 +699,7 @@
           "color": { "mode": "thresholds" },
           "max": 3,
           "min": 0,
-          "noValue": "0.82",
+          "noValue": "No data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -712,9 +723,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "portfolio_web_vitals_fcp_seconds or vector(0.82)",
+          "expr": "portfolio_web_vitals_fcp_seconds{job=\"portfolio_website\"} >= 0",
           "legendFormat": "FCP",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -728,7 +740,7 @@
           "color": { "mode": "thresholds" },
           "max": 0.3,
           "min": 0,
-          "noValue": "0.012",
+          "noValue": "No data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -752,9 +764,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "portfolio_web_vitals_cls or vector(0.012)",
+          "expr": "portfolio_web_vitals_cls{job=\"portfolio_website\"} >= 0",
           "legendFormat": "CLS",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -768,7 +781,7 @@
           "color": { "mode": "thresholds" },
           "max": 2,
           "min": 0,
-          "noValue": "0.24",
+          "noValue": "No data",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -792,9 +805,10 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "portfolio_web_vitals_ttfb_seconds or vector(0.24)",
+          "expr": "portfolio_web_vitals_ttfb_seconds{job=\"portfolio_website\"} >= 0",
           "legendFormat": "TTFB",
-          "range": true,
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -813,5 +827,5 @@
   "timezone": "browser",
   "title": "Harshavardhan Kurtkoti — Portfolio Telemetry & RUM",
   "uid": "portfolio-analytics",
-  "version": 1
+  "version": 2
 }

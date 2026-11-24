@@ -15,7 +15,8 @@ LABEL description="Unified Grafana and Prometheus monitoring stack for single-se
 USER root
 
 # Install curl for container health checks
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl nodejs nginx
+COPY grafana/collector /opt/portfolio
 
 # Copy Prometheus binaries from stage 1
 COPY --from=prometheus_source /bin/prometheus /bin/prometheus
@@ -29,12 +30,11 @@ COPY grafana/grafana.ini /etc/grafana/grafana.ini
 COPY grafana/provisioning /etc/grafana/provisioning
 
 # Copy container entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+ENV EMBEDDED_PROMETHEUS=1
 
 # Create necessary directories and configure permissions for Grafana user (UID 472)
 RUN mkdir -p /prometheus /var/lib/grafana /var/log/grafana && \
-    chown -R 472:0 /prometheus /etc/prometheus /etc/grafana /var/lib/grafana /var/log/grafana /entrypoint.sh
+    chown -R 472:0 /prometheus /etc/prometheus /etc/grafana /var/lib/grafana /var/log/grafana
 
 USER 472
 
@@ -45,4 +45,4 @@ EXPOSE 3000 9090
 HEALTHCHECK --interval=15s --timeout=5s --start-period=15s --retries=3 \
   CMD curl -f http://localhost:${PORT:-3000}/api/health || exit 1
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/opt/portfolio/start.sh"]

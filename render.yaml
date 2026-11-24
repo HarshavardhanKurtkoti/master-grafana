@@ -45,7 +45,7 @@ services:
         fromService:
           type: web
           name: master-prometheus
-          property: host
+          envVarKey: RENDER_EXTERNAL_URL
     # Uncomment the disk block below if running on a paid Render plan (Starter+)
     # disk:
     #   name: grafana-data

@@ -6,7 +6,8 @@ LABEL description="Custom Grafana Dashboard with auto-provisioned Prometheus dat
 USER root
 
 # Install curl for robust health checking
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl nodejs nginx
+COPY collector /opt/portfolio
 
 # Copy custom configuration and provisioning rules
 COPY grafana.ini /etc/grafana/grafana.ini
@@ -24,3 +25,5 @@ EXPOSE 3000
 # Built-in Grafana health endpoint is /api/health
 HEALTHCHECK --interval=15s --timeout=5s --start-period=15s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
+
+ENTRYPOINT ["/bin/bash", "/opt/portfolio/start.sh"]
