@@ -23,7 +23,7 @@ echo "[+] Starting Prometheus on port 9090..."
 /bin/prometheus \
   --config.file=/etc/prometheus/prometheus.yml \
   --storage.tsdb.path=/prometheus \
-  --web.listen-address="0.0.0.0:9090" \
+  --web.listen-address=":9090" \
   --web.enable-lifecycle &
 PROM_PID=$!
 
