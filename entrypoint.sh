@@ -9,6 +9,7 @@ echo "=================================================="
 if [ -n "$PORT" ]; then
   export GF_SERVER_HTTP_PORT="$PORT"
   echo "[+] Detected Render PORT=$PORT, configuring Grafana to listen on $PORT"
+  sed -i "s/127.0.0.1:3000/127.0.0.1:$PORT/g" /etc/prometheus/prometheus.yml 2>/dev/null || true
 fi
 
 # Ensure Prometheus URL points to internal IPv4 127.0.0.1 if not explicitly overridden
