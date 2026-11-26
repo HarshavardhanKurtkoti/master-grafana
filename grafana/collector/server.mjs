@@ -3,8 +3,10 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { TelemetryStore } from './store.mjs';
 import { record } from './record.mjs';
+import { MnemoraTelemetryStore } from './mnemora-store.mjs';
 
 const stateFile = process.env.COLLECTOR_STATE_FILE || '/var/lib/grafana/portfolio-events.json';
+const mnemoraStore = new MnemoraTelemetryStore();
 const verifier = Buffer.from(process.env.COLLECTOR_TOKEN_SHA256 ||
   readFileSync(new URL('./relay-key.sha256', import.meta.url), 'utf8').trim(), 'hex');
 if (verifier.length !== 32) throw new Error('Invalid collector token verifier');
@@ -53,6 +55,43 @@ createServer(async (req, res) => {
     res.setHeader('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
     return res.end(current.toPrometheusFormat());
   }
+  if (req.method === 'GET' && req.url === '/mnemora-telemetry/metrics') {
+    res.setHeader('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
+    return res.end(mnemoraStore.toPrometheusFormat());
+  }
+
+  // Handle Mnemora telemetry events
+  if (req.method === 'POST' && req.url === '/mnemora-telemetry/events') {
+    let body;
+    try {
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      body = JSON.parse(Buffer.concat(chunks).toString());
+    } catch {
+      return res.writeHead(400).end();
+    }
+    try {
+      if (body.type === 'query') {
+        mnemoraStore.recordQuery(body.data || {});
+      } else if (body.type === 'retrieval_inspect') {
+        mnemoraStore.recordRetrievalInspect(body.data || {});
+      } else if (body.type === 'evaluation') {
+        mnemoraStore.recordEvaluationMetrics(body.data || {});
+      } else if (body.type === 'heartbeat') {
+        mnemoraStore.recordHeartbeat(body.data?.sessionId);
+      } else if (Array.isArray(body)) {
+        for (const evt of body) {
+          if (evt.type === 'query') mnemoraStore.recordQuery(evt.data || {});
+        }
+      }
+      res.writeHead(204).end();
+    } catch (e) {
+      console.error('Mnemora event failed', e);
+      res.writeHead(500).end();
+    }
+    return;
+  }
+
   if (req.method !== 'POST' || req.url !== '/portfolio-telemetry/events') return res.writeHead(404).end();
   const token = /^Bearer ([a-f0-9]{64})$/.exec(req.headers.authorization || '')?.[1];
   if (!token || !timingSafeEqual(verifier, createHash('sha256').update(token).digest())) {

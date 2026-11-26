@@ -44,3 +44,16 @@ scrape_configs:
           service: "portfolio-website"
           domain: "harshakurtkoti.in"
           environment: "production"
+
+  # Scrape Mnemora RAG Intelligence Platform (mnemora.harshakurtkoti.in)
+  - job_name: "mnemora_rag"
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: "/mnemora-telemetry/metrics"
+    scheme: "https"
+    static_configs:
+      - targets: ["grafana.harshakurtkoti.in"]
+        labels:
+          service: "mnemora-rag"
+          domain: "mnemora.harshakurtkoti.in"
+          environment: "production"
