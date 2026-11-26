@@ -1,15 +1,28 @@
 apiVersion: 1
 
 providers:
-  - name: "Default"
+  # 1. Root Level Dashboards (General Folder)
+  - name: "Root"
     orgId: 1
-    folder: "Monitoring"
-    folderUid: "monitoring"
+    folder: ""
     type: file
     disableDeletion: false
     editable: true
     updateIntervalSeconds: 30
     allowUiUpdates: true
     options:
-      path: /etc/grafana/provisioning/dashboards/json
+      path: /etc/grafana/provisioning/dashboards/json/root
       foldersFromFilesStructure: false
+
+  # 2. Structured Project & Infrastructure Folders
+  - name: "Structured Folders"
+    orgId: 1
+    folder: ""
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json/folders
+      foldersFromFilesStructure: true
